@@ -16,7 +16,7 @@ cur.execute("select name from products;")
 total = cur.fetchall()
 
 for i in range(0, len(total)):
-    verg = []
+    # verg = []
     print(i, 'next')
     name = str(total[i])
     name = name.replace('(', '')
@@ -55,31 +55,8 @@ for i in range(0, len(total)):
     break
             # verg.append(name2)
 
-        # cur.execute("INSERT INTO all_p (_ID, vergelijkbaar) VALUES (%s, %s)",
-        #     (i['_id'],
-        #      i['na'] if 'vergelijkbaar' in i else None,))
-#cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
-# Pass data to fill a query placeholders and let Psycopg perform
-# the correct conversion (no more SQL injections!)
 
 
-
-# a = []
-# for i in products:
-#     if 'brand' in i:
-#         if i['brand'] not in a:
-#             cur.execute("INSERT INTO same (_ID, brand) VALUES (%s, %s)",
-#                         (i['_id'],
-#                          i['brand'] if 'brand' in i else None))
-#             a.append(i['brand'])
-#ID, category, brand, gender, sub category, sub sub category, color, name, price
-"""
-# Query the database and obtain data as Python objects
-cur.execute("SELECT * FROM test;")
-cur.fetchone()
-(1, 100, "abc'def")
-"""
-# Make the changes to the database persistent
 conn.commit()
 
 # Close communication with the database
