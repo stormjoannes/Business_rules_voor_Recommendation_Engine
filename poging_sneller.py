@@ -3,6 +3,7 @@
 #https://www.psycopg.org/docs/usage.html
 
 import psycopg2
+import random
 
 conn = psycopg2.connect("dbname=data user=postgres password=postgres")
 cur = conn.cursor()
@@ -15,49 +16,68 @@ cur.execute("CREATE TABLE same (id serial PRIMARY KEY, "
 cur.execute("select name from products;")
 total = cur.fetchall()
 
-for i in range(0, len(total)):
-    # verg = []
-    print(i, 'next')
-    name = str(total[i])
-    name = name.replace('(', '')
-    name = name.replace(')', '')
-    name = name.replace(',', '')
+count = 0
 
-    name = name[1:len(name) - 1]
+
+for i in range(0, len(total)):
+    count += 1
+    verg = []
+    name = str(total[i][0])
     if "'" in name:
         name = name.split("'")
         name = name[0] + "''" + name[1]
-
     name = "'" + name + "'"
 
     func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
     cur.execute(func)
     allprod = cur.fetchall()
+    print(allprod[0])
+
+
+    uitvoeren = "select name from products where discount = "'{}'".format(allprod[0][0]) and targetaudience = "'{}'".format(allprod[0][1]) and category = "'{}'".format(allprod[0][2]) and subcategory = "'{}'";".format(allprod[0][3])
+    print(uitvoeren)
+    cur.execute(uitvoeren)
+    hiero = cur.fetchall()
+    print(hiero)
 
     for d in range(0, len(total)):
-        print(d, 'volgend')
-        name2 = str(total[d])
-        name2 = name2.replace('(', '')
-        name2 = name2.replace(')', '')
-        name2 = name2.replace(',', '')
+        if len(verg) < 5:
+            name2 = str(total[d][0])
+            if "'" in name2:
+                name2 = name2.split("'")
+                name2 = name2[0] + "''" + name2[1]
+            name2 = "'" + name2 + "'"
 
-        name2 = name2[1:len(name2) - 1]
-        if "'" in name2:
-            name2 = name2.split("'")
-            name2 = name2[0] + "''" + name2[1]
-        name2 = "'" + name2 + "'"
+            func2 = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(
+                name2)
+            cur.execute(func2)
+            allgerela = cur.fetchall()
+            if allprod == allgerela:
+                verg.append(name2.replace("'", ''))
+        else:
+            break
 
-        func2 = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name2)
-        cur.execute(func2)
-        allgerela = cur.fetchall()
-        if allprod == allgerela:
-            cur.execute("INSERT INTO same (basisproduct, vergelijkbaar) VALUES (%s, %s)", (name, name2))
-    break
+
+    print(name, name)
+    print(verg)
+    if name.replace("'", '') in verg:
+        verg.remove(name.replace("'", ''))
+    for last in verg:
+        cur.execute("INSERT INTO same (basisproduct, vergelijkbaar) VALUES (%s, %s)", (name, last))
+    if count >= 1000:
+        break
             # verg.append(name2)
 
-
-
 conn.commit()
+
+cur.execute("select vergelijkbaar from same;")
+allrecommended = cur.fetchall()
+recommendation = []
+while len(recommendation) < 3:
+    rand_keuze = random.choice(allrecommended)
+    if rand_keuze not in recommendation:
+        recommendation.append(rand_keuze)
+print(recommendation)
 
 # Close communication with the database
 cur.close()
