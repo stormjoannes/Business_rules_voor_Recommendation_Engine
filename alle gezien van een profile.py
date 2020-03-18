@@ -88,7 +88,7 @@ def insert_into_table(id, prod):
     for d in range(0, len(total)):
         if name.replace("'", '') in verg:
             verg.remove(name.replace("'", ''))
-            
+
         if len(verg) < 3:
             name2 = str(total[d][0])
             if "'" in name2:
