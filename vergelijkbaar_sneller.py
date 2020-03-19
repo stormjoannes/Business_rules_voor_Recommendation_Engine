@@ -17,6 +17,7 @@ cur.execute("select name from products;")
 total = cur.fetchall()
 
 count = 0
+
 for i in range(0, len(total)):
     count += 1
     verg = []
@@ -31,41 +32,27 @@ for i in range(0, len(total)):
     cur.execute(func)
     allprod = cur.fetchall()
 
-    func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
-    print(func)
-    cur.execute(func)
-    print(allprod, 'alllproddd')
-    print(name)
-    allprod = cur.fetchall()
-    allprod = allprod[0]
-    uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(allprod[3]))
-    cur.execute(uitsmallen)
-    versmald = cur.fetchall()
-    print(versmald)
-
-    for d in range(0, len(versmald)):
+    for d in range(0, len(total)):
         if name.replace("'", '') in verg:
             verg.remove(name.replace("'", ''))
         if len(verg) < 3:
-            name2 = str(versmald[d][0])
+            name2 = str(total[d][0])
             if "'" in name2:
                 name2 = name2.split("'")
                 name2 = name2[0] + "''" + name2[1]
             name2 = "'" + name2 + "'"
 
-            func2 = "select discount, targetaudience, category, subcategory from products where id = "'{}'";".format(name2)
+            func2 = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name2)
             cur.execute(func2)
             allgerela = cur.fetchall()
-
-            if allprod == allgerela[0]:
+            if allprod == allgerela:
                 verg.append(name2.replace("'", ''))
         else:
             break
 
     for last in verg:
         cur.execute("INSERT INTO same (basisproduct, vergelijkbaar) VALUES (%s, %s)", (name, last))
-    print(i)
-    if count >= 1000:
+    if count >= 281:
         break
     print(verg)
             # verg.append(name2)
