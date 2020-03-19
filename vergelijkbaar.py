@@ -16,9 +16,9 @@ cur.execute("CREATE TABLE same (id serial PRIMARY KEY, "
 cur.execute("select name from products;")
 total = cur.fetchall()
 
-count = 0
+# count = 0
 for i in range(0, len(total)):
-    count += 1
+    # count += 1
     verg = []
     name = str(total[i][0])
     print(name)
@@ -59,11 +59,8 @@ for i in range(0, len(total)):
 
     for last in verg:
         cur.execute("INSERT INTO same (product, vergelijkbaar) VALUES (%s, %s)", (name, last))
-    print(i)
-    if count >= 1000:
-        break
-    print(verg)
-            # verg.append(name2)
+    # if count >= 1000:
+    #     break
 
 conn.commit()
 
