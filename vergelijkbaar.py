@@ -1,7 +1,3 @@
-#https://www.jetbrains.com/help/pycharm/installing-uninstalling-and-upgrading-packages.html
-#https://api.mongodb.com/python/current/tutorial.html
-#https://www.psycopg.org/docs/usage.html
-
 import psycopg2
 import random
 
@@ -25,7 +21,6 @@ for i in range(0, len(total)):
     if "'" in name:
         name = name.replace("'", "''")
     name = "'" + name + "'"
-
     func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
     cur.execute(func)
     allprod = cur.fetchall()
@@ -34,7 +29,8 @@ for i in range(0, len(total)):
     cur.execute(func)
     allprod = cur.fetchall()
     allprod = allprod[0]
-    uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(allprod[3]))
+    koek = allprod[3]
+    uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 
@@ -57,6 +53,7 @@ for i in range(0, len(total)):
         else:
             break
 
+    print(verg)
     for last in verg:
         cur.execute("INSERT INTO same (product, vergelijkbaar) VALUES (%s, %s)", (name, last))
     # if count >= 1000:

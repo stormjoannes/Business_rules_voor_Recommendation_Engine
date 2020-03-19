@@ -1,7 +1,3 @@
-# https://www.jetbrains.com/help/pycharm/installing-uninstalling-and-upgrading-packages.html
-# https://api.mongodb.com/python/current/tutorial.html
-# https://www.psycopg.org/docs/usage.html
-
 import psycopg2
 
 conn = psycopg2.connect("dbname=data user=postgres password=postgres")
@@ -122,7 +118,6 @@ def insert_into_table(id, prod):
     for last in verg:
         cur.execute("INSERT INTO vergelijkbaar_prof (prof_id, vergelijkbaar) VALUES (%s, %s)", (id, last))
         conn.commit()
-
 
 base()
 
