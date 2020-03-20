@@ -24,13 +24,12 @@ for i in range(0, len(total)):
     func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
     cur.execute(func)
     allprod = cur.fetchall()
-
-    func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
-    cur.execute(func)
-    allprod = cur.fetchall()
     allprod = allprod[0]
     koek = allprod[3]
-    uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek))
+    if koek == None or "'" not in koek:
+        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek))
+    elif "'" in koek:
+        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek.replace("'", '')))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 

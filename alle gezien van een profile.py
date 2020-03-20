@@ -91,7 +91,11 @@ def insert_into_table(id, prod):
     cur.execute(func)
     allprod = cur.fetchall()
     allprod = allprod[0]
-    uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(allprod[3]))
+    koek = allprod[3]
+    if koek == None or "'" not in koek:
+        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek))
+    elif "'" in koek:
+        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek.replace("'", '')))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 
