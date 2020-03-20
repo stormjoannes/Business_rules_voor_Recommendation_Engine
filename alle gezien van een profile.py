@@ -20,10 +20,10 @@ total = cur.fetchall()
 
 
 def base():
+    "'vanuit hier run ik het begin en zorg ik dat alles op de manier loopt hoe ik het wil hebben'"
     hi = 0
     for id in tot_id:
         hi += 1
-        print(id)
         verz = verzameling(id)
         eind = prod_ophalen(verz, id)
         insert_into_table(id, eind)
@@ -32,6 +32,7 @@ def base():
 
 
 def verzameling(id):
+    "'in deze functie haal ik de verzameling producten op waar het desbetreffende profile_id naar heeft gekeken'"
     id = "'{}'".format(id[0])
     uitv = "select prodid from profiles_previously_viewed where profid = "'{}'";".format(id)
     cur.execute(uitv)
@@ -40,6 +41,7 @@ def verzameling(id):
 
 
 def prod_ophalen(verz, id):
+    "'In deze functie bepaal ik welk product en de naam van het product die we gaan kieze nom gerelateerde producten weer te geven.'"
     if len(verz) > 0:
         if len(verz) > 1:
             verz = verz[len(verz) - 1]
@@ -56,6 +58,7 @@ def prod_ophalen(verz, id):
 
 
 def search_same(id):
+    "'in deze functie ga ik kijken wel profiel die al naar producten heeft gekeken op het desbetreffende profiel lijkt, hiermee kan ik toch een recommendation geven terwijl diegene nog nergens naar heeft gekeken'"
     search_verg = verge_mat(id)
     cur.execute("select profid from profiles_previously_viewed")
     test_id = cur.fetchall()
@@ -69,7 +72,7 @@ def search_same(id):
 
 
 def verge_mat(id):
-    print('koeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeekkkkkkkkkkkkkkkkkkkkkkkkkkkjjjjjjjjjjjjjjjjjjeeeeeeeeeeeeeeeeeeee')
+    "'In deze functie haal ik de eigenschappen van een profile op'"
     id = "'{}'".format(id[0])
     uitv = "select segment, devicetype from sessions where profid = "'{}'";".format(id)
     cur.execute(uitv)
@@ -78,6 +81,7 @@ def verge_mat(id):
 
 
 def insert_into_table(id, prod):
+    "'In deze functie word de recommended van het product uitgerekend door middel van de de eigenschappen, deze worden gefilterd door de 'filter''"
     filter = ['discount', 'targetaudience', 'category', 'subcategory']
     filt = ''
     for a in range(0, len(filter)):
@@ -129,12 +133,12 @@ def insert_into_table(id, prod):
         else:
             break
 
-    print(verg)
     for last in verg:
         cur.execute("INSERT INTO vergelijkbaar_prof (prof_id, vergelijkbaar) VALUES (%s, %s)", (id, last))
-        conn.commit()
+        conn.commit()               #Hier commit ik de informatie naar de database
 
 def teller(filter, name):
+    "'Hierin kijk ik bij welke filter er zo min mogelijk uitkomsten geeft om een for loop in te plaatsen'"
     minimum = []
     for i in range(0, len(filter)):
         if name[i] == None:
@@ -155,6 +159,6 @@ def teller(filter, name):
 
 base()
 
-# Close communication with the database
+# hier sluit ik de communicatie met de database
 cur.close()
 conn.close()
