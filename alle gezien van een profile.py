@@ -27,7 +27,7 @@ def base():
         verz = verzameling(id)
         eind = prod_ophalen(verz, id)
         insert_into_table(id, eind)
-        if hi > 5:
+        if hi > 1:
             break
 
 
@@ -69,14 +69,22 @@ def search_same(id):
 
 
 def verge_mat(id):
+    print('koeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeekkkkkkkkkkkkkkkkkkkkkkkkkkkjjjjjjjjjjjjjjjjjjeeeeeeeeeeeeeeeeeeee')
     id = "'{}'".format(id[0])
-    uitv = "select devicefamily, devicetype from sessions where profid = "'{}'";".format(id)
+    uitv = "select segment, devicetype from sessions where profid = "'{}'";".format(id)
     cur.execute(uitv)
     tot = cur.fetchall()
     return tot
 
 
 def insert_into_table(id, prod):
+    filter = ['discount', 'targetaudience', 'category', 'subcategory']
+    filt = ''
+    for a in range(0, len(filter)):
+        if a != len(filter) - 1:
+            filt += filter[a] + ", "
+        else:
+            filt += filter[a]
     verg = []
     name = prod
     if "'" in name:
@@ -87,15 +95,17 @@ def insert_into_table(id, prod):
     cur.execute(func)
     allprod = cur.fetchall()
 
-    func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
+    func = f"select {filt} from products where name = "'{}'";".format(name)
     cur.execute(func)
     allprod = cur.fetchall()
     allprod = allprod[0]
-    koek = allprod[3]
-    if koek == None or "'" not in koek:
-        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek))
-    elif "'" in koek:
-        uitsmallen = "select id from products where subcategory = "'{}'"".format("'{}'".format(koek.replace("'", '')))
+    uitk = teller(filter, allprod)
+
+    koek = allprod[uitk[1]]
+    if koek == None:
+        uitsmallen = f"select id from products where {uitk[0]} = null;"
+    else:
+        uitsmallen = f"select id from products where {uitk[0]} = "'{}'"".format("'{}'".format(koek.replace("'", '')))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 
@@ -119,9 +129,29 @@ def insert_into_table(id, prod):
         else:
             break
 
+    print(verg)
     for last in verg:
         cur.execute("INSERT INTO vergelijkbaar_prof (prof_id, vergelijkbaar) VALUES (%s, %s)", (id, last))
         conn.commit()
+
+def teller(filter, name):
+    minimum = []
+    for i in range(0, len(filter)):
+        if name[i] == None:
+            uitvoeren = f"select id from products where {filter[i]} = null;"
+        else:
+            naam = name[i]
+            if "'" in str(naam):
+                naam = name[i].replace("'", "''")
+            uitvoeren = f"select id from products where {filter[i]} = "'{}'"".format("'{}'".format(naam))
+        cur.execute(uitvoeren)
+        aantal = cur.fetchall()
+        minimum.append(len(aantal))
+    x = min(minimum)
+    for y in range(0, len(minimum)):
+        if minimum[y] == x:
+            min_filt = filter[y]
+            return min_filt, y
 
 base()
 
