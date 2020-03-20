@@ -10,7 +10,7 @@ cur.execute("select id from profiles")
 tot_id = cur.fetchall()
 
 cur.execute("DROP TABLE IF EXISTS vergelijkbaar_prof;")
-
+                                                                                        #Hier drop ik de table zo nodig en maak ik weer een nieuwe aan.
 cur.execute("CREATE TABLE vergelijkbaar_prof (id serial PRIMARY KEY, "
             "prof_id varchar, "
             "vergelijkbaar varchar);")
@@ -21,14 +21,14 @@ total = cur.fetchall()
 
 def base():
     "'vanuit hier run ik het begin en zorg ik dat alles op de manier loopt hoe ik het wil hebben'"
-    hi = 0
+    # hi = 0                #hi gebruik ik hier om een cap te geven zodat de code niet blijft runnen.
     for id in tot_id:
-        hi += 1
+        # hi += 1
         verz = verzameling(id)
         eind = prod_ophalen(verz, id)
         insert_into_table(id, eind)
-        if hi > 1:
-            break
+        # if hi > 1:
+        #     break
 
 
 def verzameling(id):
@@ -62,10 +62,10 @@ def search_same(id):
     search_verg = verge_mat(id)
     cur.execute("select profid from profiles_previously_viewed")
     test_id = cur.fetchall()
-    for h in test_id:
-        verge = verge_mat(h)
+    for tries in test_id:
+        verge = verge_mat(tries)
         if verge[0] == search_verg[0]:
-            test = verzameling(h)
+            test = verzameling(tries)
             if len(test) > 0:
                 last = prod_ophalen(test, id)
                 return last
@@ -91,13 +91,13 @@ def insert_into_table(id, prod):
             filt += filter[a]
     verg = []
     name = prod
-    if "'" in name:
+    if "'" in name:                                                #hier zorg ik dat namen met een ' in de naam geen error opleveren in de query
         name = name.replace("'", "''")
     name = "'" + name + "'"
 
     func = "select discount, targetaudience, category, subcategory from products where name = "'{}'";".format(name)
     cur.execute(func)
-    allprod = cur.fetchall()
+    allprod = cur.fetchall()                #hier haal ik de filter eigenschappen op van het product waar we de recommendations van willen.
 
     func = f"select {filt} from products where name = "'{}'";".format(name)
     cur.execute(func)
@@ -107,13 +107,13 @@ def insert_into_table(id, prod):
 
     temp_na = allprod[uitk[1]]
     if temp_na == None:
-        uitsmallen = f"select id from products where {uitk[0]} = null;"
+        uitsmallen = f"select id from products where {uitk[0]} = null;"                                         #Hier zorg ik ervoor dat als er None uitkomt, dat de code het dan verandert naar null zodat pgadmin dit kan lezen.
     else:
         uitsmallen = f"select id from products where {uitk[0]} = "'{}'"".format("'{}'".format(temp_na.replace("'", '')))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 
-    for d in range(0, len(versmald)):
+    for d in range(0, len(versmald)):                               #versmald is de verfijnde lijst van producten en die ga ik langs om de goede recommendation te zoeken
         if name.replace("'", '') in verg:
             verg.remove(name.replace("'", ''))
         if len(verg) < 4:
@@ -123,8 +123,7 @@ def insert_into_table(id, prod):
                 name2 = name2[0] + "''" + name2[1]
             name2 = "'" + name2 + "'"
 
-            func2 = "select discount, targetaudience, category, subcategory from products where id = "'{}'";".format(
-                name2)
+            func2 = "select discount, targetaudience, category, subcategory from products where id = "'{}'";".format(name2)
             cur.execute(func2)
             allgerela = cur.fetchall()
 
@@ -134,7 +133,7 @@ def insert_into_table(id, prod):
             break
 
     for last in verg:
-        cur.execute("INSERT INTO vergelijkbaar_prof (prof_id, vergelijkbaar) VALUES (%s, %s)", (id, last))
+        cur.execute("INSERT INTO vergelijkbaar_prof (prof_id, vergelijkbaar) VALUES (%s, %s)", (id, last))      #Hier zet ik de recommendations bij ieder product in de relationele database.
         conn.commit()               #Hier commit ik de informatie naar de database
 
 def teller(filter, name):
@@ -151,11 +150,11 @@ def teller(filter, name):
         cur.execute(uitvoeren)
         aantal = cur.fetchall()
         minimum.append(len(aantal))
-    x = min(minimum)
-    for y in range(0, len(minimum)):
-        if minimum[y] == x:
-            min_filt = filter[y]
-            return min_filt, y
+    mini = min(minimum)
+    for index in range(0, len(minimum)):                #hier zoek ik wat de index is van het minimum getal zodat ik kan zien bij welke filter het hoort.
+        if minimum[index] == mini:
+            min_filt = filter[index]
+            return min_filt, index
 
 base()
 
