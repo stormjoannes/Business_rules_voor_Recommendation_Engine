@@ -53,11 +53,11 @@ for i in range(0, len(total)):
     allprod = allprod[0]
     uitk = teller(filter, allprod)
 
-    koek = allprod[uitk[1]]             #Bij deze if, else zorg ik dat de lijst om te doorlopen heel klein word, zo zal de functie erg snel lopen.
-    if str(koek) == None:
+    temp_na = allprod[uitk[1]]             #Bij deze if, else zorg ik dat de lijst om te doorlopen heel klein word, zo zal de functie erg snel lopen.
+    if str(temp_na) == None:
         uitsmallen = f"select id from products where {uitk[0]} = null;"
     else:
-        uitsmallen = f"select id from products where {uitk[0]} = "'{}'"".format("'{}'".format(koek.replace("'", '')))
+        uitsmallen = f"select id from products where {uitk[0]} = "'{}'"".format("'{}'".format(temp_na.replace("'", '')))
     cur.execute(uitsmallen)
     versmald = cur.fetchall()
 
