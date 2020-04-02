@@ -34,6 +34,7 @@ def teller(filter, name):
 
 count = 0
 for i in range(0, len(total)):
+    # filter = ['targetaudience']
     filter = ['discount', 'targetaudience', 'category', 'subcategory']      #Hier zet ik de filter, je kan de filter gewoon aanpassen en alles zal alsnog perfect lopen.
     filt = ''
     for a in range(0, len(filter)):
@@ -41,6 +42,7 @@ for i in range(0, len(total)):
             filt += filter[a] + ", "
         else:
             filt += filter[a]
+        print(filt)
     count += 1
     verg = []
     name = str(total[i][0])
