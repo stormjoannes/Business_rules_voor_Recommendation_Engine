@@ -30,39 +30,31 @@ for i in range(0, len(all_profid)):
         break
     print("\rcalculating profile {}....".format(i), end='')
     temp_profid = "'" + all_profid[i][0] + "'"
-    if all_profid[i] in all_profid_viewed:
-        print('yes')
-        cur.execute(f"select prodid from profiles_previously_viewed where profid = {temp_profid}")
-        var = cur.fetchall()
-        var = var[0][0]
-    else:
-        print('no')
+    cur.execute(f"select prodid from profiles_previously_viewed where profid = {temp_profid}")
+    var = cur.fetchall()
+    var = var[0]
+    # var = ('45218')
+    if var[0] == None:
         var = random.choice(prod_null)
-
-    var = "'" + str(var[0]) + "'"
-    executer = f"select targetaudience from products where id = {var};"
-    cur.execute(executer)
-    targ_prod = cur.fetchall()
-    targ_prod = targ_prod[0]
-
-    if targ_prod[0] == None:
-        exe = f"select id from products where targetaudience IS NULL LIMIT 100"
-        cur.execute(exe)
-
-    elif "'" in targ_prod[0]:
-        targ_prod = targ_prod[0].split("'")
-        targ_prod = targ_prod[0] + '%'
-        targ_prod = "'" + str(targ_prod) + "'"
-        exe = f"select id from products where targetaudience LIKE {targ_prod} LIMIT 100"
-        cur.execute(exe)
     else:
-        targ_prod = "'" + str(targ_prod[0]) + "'"
-        exe = f"select id from products where targetaudience LIKE {targ_prod} LIMIT 100"
-        cur.execute(exe)
+        executer = f"select targetaudience from products where id = %s;"
+        cur.execute(executer, (var,))
+        targ_prod = cur.fetchall()
+        targ_prod = targ_prod[0]
+        if targ_prod[0] == None:
+            exe = f"select id from products where targetaudience IS NULL LIMIT 10"
+            cur.execute(exe)
 
-    all_rec = cur.fetchall()
-    rand = random.choice(all_rec)
-    cur.execute("INSERT INTO profid_targetaudience (id_, recommendation) VALUES (%s, %s)", (all_profid[i], rand))
+        else:
+            targ_prod = targ_prod[0].split("'")
+            targ_prod = targ_prod[0] + '%'
+            targ_prod = "'" + str(targ_prod) + "'"
+            exe = f"select id from products where targetaudience LIKE {targ_prod} LIMIT 10"
+            cur.execute(exe)
+
+        all_rec = cur.fetchall()
+        rand = random.choice(all_rec)
+        cur.execute("INSERT INTO profid_targetaudience (id_, recommendation) VALUES (%s, %s)", (all_profid[i], rand))
 
 
 conn.commit()
