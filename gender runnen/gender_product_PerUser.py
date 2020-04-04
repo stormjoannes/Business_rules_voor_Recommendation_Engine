@@ -3,86 +3,82 @@ import random
 
 conn = psycopg2.connect("dbname=Onlinestore user=postgres password=postgres")
 cur = conn.cursor()
-cur.execute("DROP TABLE IF EXISTS profid_targetaudience;")               #Verwijderd de table die ik ga aanmaken als de table al bestaat, zo voorkom ik errors.
+cur.execute("DROP TABLE IF EXISTS profid_targetaudience;")  # Verwijderd de table die ik ga aanmaken als de table al bestaat, zo voorkom ik errors.
 
-cur.execute("CREATE TABLE profid_targetaudience (id_ varchar PRIMARY KEY, "                #hier create ik mijn table.
+cur.execute("CREATE TABLE profid_targetaudience (id_ varchar PRIMARY KEY, "  # hier create ik mijn table.
             "recommendation varchar);")
 
-cur.execute("select id from profile_recommendations;")
-all_profid = cur.fetchall()
+def base():
+    all = all_inf()
+    all_profid = all[0]
+    all_prodid = all[1]
+    for i in range(0, len(all_profid)):
+        print("\rRendering profile recommendations: {} from 2081649....".format(i), end='')
+        executer = """select deal, targetaudience from products where id = %s or id = %s or id = %s;"""
+        cur.execute(executer, (all_prodid[i][0], all_prodid[i][1], all_prodid[i][2],))
+        targ_prod_all = cur.fetchall()
 
+        all_audience = []
+        all_deal = []
+        for index in targ_prod_all:
+            all_audience.append(index[1])
+            if index[0] != None:
+                all_deal.append(index[0])
+        targ_prod = most_common(all_audience)
+        best_deal = most_common(all_deal)
 
-cur.execute("select catrecommend, subcatrecommend, subsubcatrecommend from profile_recommendations;")
-all_prodid = cur.fetchall()
+        rand = recommended(targ_prod, best_deal)
+        cur.execute("INSERT INTO profid_targetaudience (id_, recommendation) VALUES (%s, %s)", (all_profid[i], rand))
 
-for i in range( 0, len(all_profid)):
-    print("\rcalculating profile {}....".format(i), end='')
-    var = all_prodid[i][0]
-    var = "'" + str(var) + "'"
-    catrecommend = "'" + all_prodid[i][0] + "'"
-    subcatrecommend = "'" + all_prodid[i][1] + "'"
-    subsubcatrecommend = "'" + all_prodid[i][2] + "'"
-    executer = f"select deal, targetaudience from products where id = {catrecommend} or id = {subcatrecommend} or id = {subsubcatrecommend};"
-    cur.execute(executer)
-    targ_prod_all = cur.fetchall()
+def recommended(targ_prod, best_deal):
+    if None == targ_prod or None == best_deal:
+        if targ_prod == None and best_deal != None:
+            exe = """select id from products where targetaudience IS NULL and deal LIKE %s LIMIT 5"""
+            cur.execute(exe, (best_deal,))
+        elif best_deal == None and targ_prod != None:
+            exe = """select id from products where targetaudience LIKE %s and deal IS NULL LIMIT 5"""
+            cur.execute(exe, (targ_prod,))
+        else:
+            cur.execute("select id from products where targetaudience IS NULL and deal IS NULL LIMIT 5")
 
-    all_audience = []
-    all_deal = []
-    for q in targ_prod_all:
-        all_audience.append(q[1])
-        if q[0] != None:
-            all_deal.append(q[0])
+    else:
+        exe = """select id from products where targetaudience LIKE %s and deal like %s LIMIT 5"""
+        cur.execute(exe, (targ_prod, best_deal,))
 
-    views = []
-    for index in all_audience:
-        hvl = all_audience.count(index)
-        views.append(hvl)
-    popu = max(views)
-    for g in range(0, len(views)):
-        if popu == views[g]:
-            targ_prod = all_audience[g]
-            break
+    all_rec = cur.fetchall()
+    if len(all_rec) == 0:
+        exe = """select id from products where targetaudience LIKE %s LIMIT 5"""
+        cur.execute(exe, (targ_prod,))
+        all_rec = cur.fetchall()
+    return random.choice(all_rec)
 
+def most_common(list):
     temp_count = []
-    for tem in all_deal:
-        how_much = all_deal.count(tem)
+    for tem in list:
+        how_much = list.count(tem)
         temp_count.append(how_much)
     if len(temp_count) > 0:
         popular = max(temp_count)
-        for where in range(0, len(temp_count)):
-            if popular == temp_count[where]:
-                best_deal = all_deal[where]
+        for index in range(0, len(temp_count)):
+            if popular == temp_count[index]:
+                if list[index] != None:
+                    if list[index].count("'") > 1:
+                        list[index] = list[index][1, len(list[index]) - 1]
+                    if "'" in list[index]:
+                        list[index] = list[index].split("'")
+                        list[index] = str(list[index][0]) + '%'
+                return list[index]
 
-    if None == targ_prod:
-        if best_deal.count("'") < 2:
-            best_deal = "'" + best_deal + "'"
-        exe = f"select id from products where targetaudience IS NULL and deal like {best_deal} LIMIT 5"
-        cur.execute(exe)
+def all_inf():
+    cur.execute("select id from profile_recommendations;")
+    all_profid = cur.fetchall()
 
-    else:
-        targ_prod = targ_prod
-        targ_prod = targ_prod.split("'")
-        targ_prod = targ_prod[0] + '%'
-        if best_deal.count("'") < 2:
-            best_deal = "'" + best_deal + "'"
-        if targ_prod == 'Unisex%':
-            targ_prod = "'" + str(targ_prod) + "'"
-            exe = f"select id from products where targetaudience LIKE {targ_prod}LIMIT 5"
-            cur.execute(exe)
-        else:
-            targ_prod = "'" + str(targ_prod) + "'"
-            exe = f"select id from products where targetaudience LIKE {targ_prod} and deal like {best_deal} LIMIT 5"
-            cur.execute(exe)
+    cur.execute("select catrecommend, subcatrecommend, subsubcatrecommend from profile_recommendations;")
+    all_prodid = cur.fetchall()
+    return all_profid, all_prodid
 
-        all_rec = cur.fetchall()
-        if len(all_rec) == 0:
-            exe = f"select id from products where targetaudience LIKE {targ_prod}LIMIT 5"
-            cur.execute(exe)
-            all_rec = cur.fetchall()
-        rand = random.choice(all_rec)
-        cur.execute("INSERT INTO profid_targetaudience (id_, recommendation) VALUES (%s, %s)", (all_profid[i], rand))
-
-    conn.commit()
+base()
+conn.commit()
 
 # Hier sluit ik de communicatie met de database
 cur.close()
